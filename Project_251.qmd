@@ -1,0 +1,30 @@
+---
+title: "Project_251"
+format: pdf
+author: "Brandon Upper, Ben Murdock, Hannah Lyons"
+---
+
+# Hannah: Short Written Description + Extra Graph
+Also include a short written description of the data set
+(including a URL if possible).  
+
+
+
+# Ben: Proposed Research Question
+
+Your proposed research question, why you chose that research question, 
+and how the data will permit you to answer. Left vs Right foot.
+
+We would like to determine if there is a difference between number of 
+successful penalty kicks of right footed vs. left footed soccer players. We will
+measure the rate in porportion of successes kicks.
+
+
+# Brandon: EDA
+
+The proposed data source and a well-organized and well-articulated exploratory 
+analysis of its contents (this should include well-labeled plots created in R).  
+
+
+
+
