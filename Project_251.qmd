@@ -5,26 +5,49 @@ author: "Brandon Upper, Ben Murdock, Hannah Lyons"
 ---
 
 # Hannah: Short Written Description + Extra Graph
-Also include a short written description of the data set
-(including a URL if possible).  
 
-
+Also include a short written description of the data set (including a URL if possible).
 
 # Ben: Proposed Research Question
 
-Your proposed research question, why you chose that research question, 
-and how the data will permit you to answer. Left vs Right foot.
+Your proposed research question, why you chose that research question, and how the data will permit you to answer. Left vs Right foot.
 
-We would like to determine if there is a difference between number of 
-successful penalty kicks of right footed vs. left footed soccer players. We will
-measure the rate in porportion of successes kicks.
-
+We would like to determine if there is a difference between number of successful penalty kicks of right footed vs. left footed soccer players. We will measure the rate in proportion of successes kicks.
 
 # Brandon: EDA
 
-The proposed data source and a well-organized and well-articulated exploratory 
-analysis of its contents (this should include well-labeled plots created in R).  
+Libraries
 
+```{r}
+library(ggplot2)
+library(vroom)
+library(tidyverse)
+```
 
+Read File
 
+```{r}
+Soccer_data <- vroom("WorldCupShootouts.csv")
+summary(Soccer_data)
+head(Soccer_data)
+```
 
+Basic plots about Goals and Penalties
+
+```{r}
+Soccer_data <- Soccer_data %>%
+  filter(is.finite(Zone)) 
+ggplot(data = Soccer_data) + geom_bar(mapping = aes(x = Zone), fill = "lightblue") 
+ggplot(data = Soccer_data) + geom_bar(mapping = aes(y = Penalty_Number), fill = "navyblue")
+```
+
+Looking for Correlation
+
+```{r}
+numeric_data <- Soccer_data %>%
+  select(where(is.numeric))
+
+library(corrplot)
+cor_matrix <- cor(numeric_data)
+corrplot(cor_matrix)
+```
