@@ -2,6 +2,8 @@
 title: "Project_251"
 format: pdf
 author: "Brandon Upper, Ben Murdock, Hannah Lyons"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
