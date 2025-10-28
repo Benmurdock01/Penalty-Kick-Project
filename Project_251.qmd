@@ -3,6 +3,19 @@ title: "Project_251"
 format: pdf
 author: "Brandon Upper, Ben Murdock, Hannah Lyons"
 ---
+```{r}
+#library
+library(vroom)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+```
+
+```{r}
+#data
+shootouts <- vroom('./WorldCupShootouts.csv')
+```
+
 
 # Hannah: Short Written Description + Extra Graph
 Also include a short written description of the data set
@@ -10,21 +23,32 @@ Also include a short written description of the data set
 
 
 
-# Ben: Proposed Research Question
+# Ben: Proposed Research Question, left/right success bar graph.
 
-Your proposed research question, why you chose that research question, 
-and how the data will permit you to answer. Left vs Right foot.
+We would like to determine if there is a difference between proportion of 
+successful penalty kicks of right footed vs. left footed soccer players.
 
-We would like to determine if there is a difference between number of 
-successful penalty kicks of right footed vs. left footed soccer players. We will
-measure the rate in porportion of successes kicks.
 
 
 # Brandon: EDA
 
 The proposed data source and a well-organized and well-articulated exploratory 
-analysis of its contents (this should include well-labeled plots created in R).  
+analysis of its contents (this should include well-labeled plots created in R).
 
+```{r}
+#left vs right foot
+
+plot_data <- shootouts %>%
+  select(Foot, Goal) %>% 
+  filter(Foot %in% c("L", "R"),
+         Goal %in% c(0, 1)) %>%
+  mutate(Goal_Status = factor(Goal, 
+                              levels = c(0, 1), 
+                              labels = c("Miss", "Success")))
+
+ggplot(plot_data, aes(x = Foot, fill = Goal_Status)) +
+  geom_bar(position = "dodge")
+```
 
 
 
