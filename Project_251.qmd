@@ -3,6 +3,7 @@ title: "Project_251"
 format: pdf
 author: "Brandon Upper, Ben Murdock, Hannah Lyons"
 ---
+
 ```{r}
 #library
 library(vroom)
@@ -16,38 +17,20 @@ library(dplyr)
 shootouts <- vroom('./WorldCupShootouts.csv')
 ```
 
+#Short Written Description Our dataset contains information on World Cup penalty shootouts from Spain 1982 to Russia 2018 sourced from Kaggle. URL: [World Cup Penalty Shootouts Dataset](https://www.kaggle.com/datasets/pablollanderos33/world-cup-penalty-shootouts)
 
-#Short Written Description
-Our dataset contains information on World Cup penalty shootouts from Spain 1982 to Russia 2018 sourced from Kaggle. 
-URL: [World Cup Penalty Shootouts Dataset](https://www.kaggle.com/datasets/pablollanderos33/world-cup-penalty-shootouts)
-
-
-The dataset contains 305 rows in total. The first row is a descriptive header, leaving 304 rows of actual data and 9 columns. The columns include:
-Game_id: Each team in a single game get's a number. Numbers are not repeated across separate games.
-Team: The country team of the kicker.
-Zone: The goal was divided into 9 sections, each labeled by number. This number is the zone.
-Foot: The foot used to take the shot (Left/Right).
-Keeper: The direction the goalkeeper dove(Left/Right)
-On Target: Indicates whether the shot would have been a goal if the keeper had not intervened(1 = Yes, 0 = No)
-Goal: Whether the penalty was successfully scored (1 = Goal, 0 = Miss)
-Penalty number: The order of the penalty within the shootout
-Elimination: Indicates whether the penalty could end the game (1 = Yes, 0 = No)
-
+The dataset contains 305 rows in total. The first row is a descriptive header, leaving 304 rows of actual data and 9 columns. The columns include: Game_id: Each team in a single game get's a number. Numbers are not repeated across separate games. Team: The country team of the kicker. Zone: The goal was divided into 9 sections, each labeled by number. This number is the zone. Foot: The foot used to take the shot (Left/Right). Keeper: The direction the goalkeeper dove(Left/Right) On Target: Indicates whether the shot would have been a goal if the keeper had not intervened(1 = Yes, 0 = No) Goal: Whether the penalty was successfully scored (1 = Goal, 0 = Miss) Penalty number: The order of the penalty within the shootout Elimination: Indicates whether the penalty could end the game (1 = Yes, 0 = No)
 
 # Ben: Proposed Research Question, left/right success bar graph.
 
-We would like to determine if there is a difference between proportion of 
-successful penalty kicks of right footed vs. left footed soccer players.
-
-
+We would like to determine if there is a difference between proportion of successful penalty kicks of right footed vs. left footed soccer players.
 
 # Brandon: EDA
 
-The proposed data source and a well-organized and well-articulated exploratory 
-analysis of its contents (this should include well-labeled plots created in R).
+The proposed data source and a well-organized and well-articulated exploratory analysis of its contents (this should include well-labeled plots created in R).
 
 ```{r}
-#left vs right foot
+#left vs right foot - success proportion
 
 plot_data <- shootouts %>%
   select(Foot, Goal) %>% 
@@ -60,6 +43,3 @@ plot_data <- shootouts %>%
 ggplot(plot_data, aes(x = Foot, fill = Goal_Status)) +
   geom_bar(position = "dodge")
 ```
-
-
-
