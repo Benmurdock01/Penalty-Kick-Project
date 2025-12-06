@@ -4,6 +4,9 @@ format: pdf
 author: "Brandon Upper, Ben Murdock, Hannah Lyons"
 editor_options: 
   chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r}
@@ -19,22 +22,182 @@ library(dplyr)
 shootouts <- vroom('./WorldCupShootouts.csv')
 ```
 
-#Short Written Description Our dataset contains information on World Cup penalty shootouts from Spain 1982 to Russia 2018 sourced from Kaggle. URL: [World Cup Penalty Shootouts Dataset](https://www.kaggle.com/datasets/pablollanderos33/world-cup-penalty-shootouts)
+## Introduction:
 
-The dataset contains 305 rows in total. The first row is a descriptive header, leaving 304 rows of actual data and 9 columns. The columns include: Game_id: Each team in a single game get's a number. Numbers are not repeated across separate games. Team: The country team of the kicker. Zone: The goal was divided into 9 sections, each labeled by number. This number is the zone. Foot: The foot used to take the shot (Left/Right). Keeper: The direction the goalkeeper dove(Left/Right) On Target: Indicates whether the shot would have been a goal if the keeper had not intervened(1 = Yes, 0 = No) Goal: Whether the penalty was successfully scored (1 = Goal, 0 = Miss) Penalty number: The order of the penalty within the shootout Elimination: Indicates whether the penalty could end the game (1 = Yes, 0 = No)
+*(Explain your research question (and necessary background information)
+as well as the value of answering it.)* 
 
-# Ben: Proposed Research Question, left/right success bar graph.
+Penalty shootouts are one of the
+most intense moments in soccer, and every choice a player makes can
+influence the outcome. One detail that often gets overlooked is whether
+a player is left-footed or right-footed and if that affects the chance
+of scoring. Our research question asks if there is a difference between
+the proportion of successful penalty kicks taken by right-footed players
+compared to left-footed players. Understanding this matters because many
+coaching decisions during a shootout are based on patterns and
+probabilities. If there is an advantage connected to success, and in
+this case dominant feet, even a small one could influence which players
+a coach chooses for these high-pressure moments. It can also help us
+understand how kickers approach the goal and whether their dominant foot
+provides any advantages
 
-We would like to determine if there is a difference between proportion of successful penalty kicks of right footed vs. left footed soccer players.
+## Methodology:
 
-# Brandon: EDA
+*(Explain how the data were obtained, as well as providing a citation of
+their source (if available). Provide a summary of the data by reporting
+summary statistics and appropriate figures. Identify the observational
+unit, select a data model (likelihood) and justify this choice (i.e.,
+determine if assumptions are reasonable and if not, provide some
+possible consequences). Explain what the relevant parameters of the
+likelihood are and how they will be useful in answering your question.
+Choose and justify your prior distributions. )*
 
-The proposed data source and a well-organized and well-articulated exploratory analysis of its contents (this should include well-labeled plots created in R).
+Our dataset contains information on World Cup penalty shootouts from
+Spain 1982 to Russia 2018 sourced from Kaggle. URL: [World Cup Penalty
+Shootouts
+Dataset](https://www.kaggle.com/datasets/pablollanderos33/world-cup-penalty-shootouts)
+
+Each observation represents one penalty kick. The dataset contains 305
+rows in total. The first row is a descriptive header, leaving 304 rows
+of actual data and 9 columns. The columns include:
+
+-   **Game_id:** Each team in a single game gets a number. Numbers are
+    not repeated across games.
+-   **Team:** The country team of the kicker.
+-   **Zone:** The goal was divided into 9 sections, each labeled by
+    number. This number is the zone.
+-   **Foot:** The foot used to take the shot (Left/Right).
+-   **Keeper:** The direction the goalkeeper dove (Left/Right).
+-   **On Target:** Whether the shot would have been a goal if the keeper
+    had not intervened (1 = Yes, 0 = No).
+-   **Goal:** Whether the penalty was successfully scored (1 = Goal, 0 =
+    Miss)
+-   **Penalty number:** The order of the penalty within the shootout
+-   **Elimination:** Indicates whether the penalty could end the game (1
+    = Yes, 0 = No)
+
+Since we are only interested in whether a shot was scored or missed, our
+key variables are Foot and Goal.There is a lot more right footed people
+who took penalties, likely because they are more common in the general
+population, but interestingly they have a lower ratio of success. This
+is something to consider when "determining if there is a difference
+between proportion of successful penalty kicks of right footed vs. left
+footed soccer players." There seems to be no strong correlations between
+any of the numeric variables.
+
+This is useful as we can see that this data is unlikely to have issues
+with multicollinearity. It's clear that different zones have higher
+portions of goals scored, and when we recognize that the zone targeted
+and thereby goal likelihood can be highly influenced by right vs left
+footed kickers. From prior soccer experience, we could look for
+tendencies in the final project for kickers to shoot towards met
+opposite of their dominant foot. The second graph also displays how long
+the shootout lasts for, and its clear that most of them end before or
+around the twelfth number.
+
+For our likelihood, we treat each penalty kick as a Bernoulli trial
+because the outcome is binary. A kick is either a success(1) or a
+failure(0). We assume that the kicks are independent within
+right/left-foot groups. Therefore, each group has its own probability of
+scoring, and these are the parameters we want to estimate. We chose a
+Beta(1, 1) prior for both groups, which is uniform because we do not
+have strong prior beliefs about which group should be more successful.
+Using an uninformed Beta(1, 1) prior lets the data speak for itself, but
+it can also make our results more sensitive when one group has a small
+sample size. This means the posterior for left footed players may be
+wider and less stable because we are not adding any prior information to
+help anchor the estimate.
+
+## Results:
+
+*(Perform posterior inference on the function of the parameters that
+directly answers your primary research question (for example, the
+difference in means, or the ratio of variances). Report and properly
+interpret an associated credible interval for this function of
+parameters. Include properly formatted and informative graphic(s) for
+this function of parameters with its corresponding prior.)*
+
+## Discussion:
+
+*(Instructions: Summarize your results, identify shortcomings of the
+work, and explain what could be done in the future to either better
+answer your question or to address a natural follow-up question.)*
+
+## Appendix:
+
+*(include all R code necessary to conduct your analysis.)*
+
+The proposed data source and a well-organized and well-articulated
+exploratory analysis of its contents (this should include well-labeled
+plots created in R).
+
+Libraries
 
 ```{r}
-#left vs right foot - success proportion
+library(ggplot2)
+library(vroom)
+library(tidyverse)
+```
 
-plot_data <- shootouts %>%
+Read File
+
+```{r}
+Soccer_data <- vroom("WorldCupShootouts.csv")
+summary(Soccer_data)
+head(Soccer_data)
+```
+
+Reading in our file we can see various factors, features and variables
+that are described more in depth in the above short description of the
+data. From this code we can see the first five rows of the data and
+notice that many points are read in as doubles and characters. For the
+final analysis, we likely will convert some of these variables for
+simplicity
+
+Basic plots about Goals and Penalties
+
+```{r}
+Soccer_data <- Soccer_data %>%
+  filter(is.finite(Zone)) 
+ggplot(data = Soccer_data) + 
+  geom_bar(mapping = aes(x = Zone), 
+           fill = "lightblue") + ggtitle("Goals by Zone") + ylab("Count")
+ggplot(data = Soccer_data) + 
+  geom_bar(mapping = aes(y = Penalty_Number), fill = "navyblue") + 
+  ggtitle("Penalty Number by Count") + ylab("Penalty Number") + xlab("Count")
+```
+
+These graphs give some visuals to some of the data and the types
+penalties we're seeing. For example, its clear that different zones have
+higher portions of goals scored, and when we recognize that the zone
+targeted and thereby goal likelihood can be highly influenced by right
+vs left footed kickers. From prior soccer experience, we could look for
+tendencies in the final project for kickers to shoot towards met
+opposite of their dominant foot. The second graph also displays how long
+the shootout lasts for, and its clear that most of them end before or
+around the twelfth number.
+
+Looking for Correlation
+
+```{r}
+numeric_data <- Soccer_data %>%
+  select(where(is.numeric))
+
+library(corrplot)
+cor_matrix <- cor(numeric_data)
+corrplot(cor_matrix)
+```
+
+There seems to be no strong correlations between any of the numeric
+variables. This is useful as we can see that this data is unlikely to
+have issues with multicollinearity.
+
+Left vs right foot - success proportion
+
+```{r}
+#
+
+plot_data <- Soccer_data %>%
   select(Foot, Goal) %>% 
   filter(Foot %in% c("L", "R"),
          Goal %in% c(0, 1)) %>%
@@ -44,4 +207,15 @@ plot_data <- shootouts %>%
 
 ggplot(plot_data, aes(x = Foot, fill = Goal_Status)) +
   geom_bar(position = "dodge")
+
+table(plot_data)
+print("Success rate L = 0.3214286 vs R = 0.2959641")
 ```
+
+Some basic data visualization looking at the success rate of left foot
+vs right foot to see if one generally has a higher rate. There is a lot
+more right footed people who took penalties, likely because they are
+more common in the general population, but interestingly they have a
+lower ratio of success. This is something to consider when "determining
+if there is a difference between proportion of successful penalty kicks
+of right footed vs. left footed soccer players."
