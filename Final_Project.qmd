@@ -1,0 +1,111 @@
+---
+title: "Final Project"
+format: pdf
+author: "Brandon Upper, Ben Murdock, Hannah Lyons"
+editor_options: 
+  chunk_output_type: console
+---
+
+*INTRODUCTION*
+"Explain your research question (and necessary background information) as well as the value of answering it."
+
+*METHODS*
+"Explain how the data were obtained, as well as providing a citation of their source (if available). Provide a summary of the data by reporting summary statistics and appropriate figures. Identify the observational unit, select a data model (likelihood) and justify this choice (i.e., determine if assumptions are reasonable and if not, provide some possible consequences). Explain what the relevant parameters of the likelihood are and how they will be useful in answering your question. Choose and justify your prior distributions."
+
+Likelihood: Since the data is binary (Goal vs. Miss), the appropriate likelihood function is the Binomial Distribution. We assume the data is independent and identically distributed (Bernoulli trials) for each foot.
+
+Prior: We will use a Beta(1, 1) prior. This is a "Uniform" or "Uninformative" prior, meaning that before seeing the data, we assume any success rate between 0% and 100% is equally likely. This is a safe "objective" starting point.
+
+
+
+```{r}
+library(tidyverse)
+
+#Load the data
+shootouts <- vroom('WorldCupShootouts.csv')
+
+clean_data <- shootouts %>%
+  filter(Foot %in% c("L", "R"), !is.na(Goal)) %>%
+  mutate(Foot = factor(Foot, levels = c("L", "R"), labels = c("Left", "Right")))
+
+#Prior Params
+# Prior: Beta(1, 1)
+prior_alpha <- 1
+prior_beta <- 1
+
+# Get counts
+counts <- clean_data %>%
+  group_by(Foot) %>%
+  summarise(
+    successes = sum(Goal),
+    n = n()
+  )
+
+y_L <- counts$successes[counts$Foot == "Left"]
+n_L <- counts$n[counts$Foot == "Left"]
+y_R <- counts$successes[counts$Foot == "Right"]
+n_R <- counts$n[counts$Foot == "Right"]
+
+#Posterior Params
+alpha_L <- prior_alpha + y_L
+beta_L  <- prior_beta + (n_L - y_L)
+
+alpha_R <- prior_alpha + y_R
+beta_R  <- prior_beta + (n_R - y_R)
+
+# Mean = alpha / (alpha + beta)
+# Var  = (alpha * beta) / ( (alpha + beta)^2 * (alpha + beta + 1) )
+
+mu_L <- alpha_L / (alpha_L + beta_L)
+var_L <- (alpha_L * beta_L) / ((alpha_L + beta_L)^2 * (alpha_L + beta_L + 1))
+
+mu_R <- alpha_R / (alpha_R + beta_R)
+var_R <- (alpha_R * beta_R) / ((alpha_R + beta_R)^2 * (alpha_R + beta_R + 1))
+
+# Diff ~ Normal(mean_diff, sd_diff)
+mean_diff <- mu_L - mu_R
+var_diff  <- var_L + var_R
+sd_diff   <- sqrt(var_diff)
+
+# Calculate 95% Credible Interval
+ci_lower <- qnorm(0.025, mean = mean_diff, sd = sd_diff)
+ci_upper <- qnorm(0.975, mean = mean_diff, sd = sd_diff)
+
+# Calculate Probability Left > Right
+prob_L_better <- 1 - pnorm(0, mean = mean_diff, sd = sd_diff)
+
+#VISUALIZATION
+x_vals <- seq(mean_diff - 4*sd_diff, mean_diff + 4*sd_diff, length.out = 1000)
+y_vals <- dnorm(x_vals, mean = mean_diff, sd = sd_diff)
+plot_df <- data.frame(Difference = x_vals, Density = y_vals)
+
+ggplot(plot_df, aes(x = Difference, y = Density)) +
+  geom_line(color = "lightblue", size = 1.2) +
+  geom_area(fill = "lightblue", alpha = 0.3) +
+  # Add CI
+  geom_vline(xintercept = c(ci_lower, ci_upper), linetype = "dashed") +
+  annotate("text", x = ci_upper + 0.02, y = max(y_vals)/2, label = "95% CI", angle = 90) +
+  # Add referance line at zero
+  geom_vline(xintercept = 0, color = "red", size = 0.5) +
+  labs(
+    title = "Posterior Difference of Left vs Right Success",
+    subtitle = paste("95% CI:", round(ci_lower, 3), "to", round(ci_upper, 3)),
+    x = "Difference in Proportion (Left - Right)",
+    y = "Density"
+  ) +
+  theme_minimal()
+```
+```
+
+
+*RESULTS*
+"Perform posterior inference on the function of the parameters that directly answers your primary research question (for example, the difference in means, or the ratio of variances). Report and properly interpret an associated credible interval for this function of parameters. Include properly formatted and informative graphic(s) for this function of parameters with its corresponding prior."
+
+
+
+*DISCUSSION*
+"Summarize your results, identify shortcomings of the work, and explain what could be done in the future to either better answer your question or to address a natural follow-up question."
+
+
+*APPENDIX*
+"Include all R code necessary to conduct your analysis."
