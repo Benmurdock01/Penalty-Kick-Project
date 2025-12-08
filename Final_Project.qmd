@@ -15,6 +15,7 @@ library(vroom)
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
+library(patchwork)
 ```
 
 ```{r}
@@ -116,6 +117,79 @@ difference in means, or the ratio of variances). Report and properly
 interpret an associated credible interval for this function of
 parameters. Include properly formatted and informative graphic(s) for
 this function of parameters with its corresponding prior.)*
+
+
+```{r}
+
+# Change directory
+setwd("~/GitHub/Penalty-Kick-Project")
+
+# Pull data and remove columns that aren't foot and goal
+shootouts <- vroom('WorldCupShootouts.csv')
+shootouts <- shootouts %>% select(c("Foot","Goal"))
+  
+Right_Foot_Data <- shootouts %>% filter(Foot == "R")
+Left_Foot_Data <- shootouts %>% filter(Foot == "L")
+
+# Computing the Y and N values for Right and Left based on data
+
+Right_Foot_Y <- sum(pull(Right_Foot_Data, Goal))
+Left_Foot_Y <- sum(pull(Left_Foot_Data, Goal))
+
+Right_Foot_N <- length(pull(Right_Foot_Data, Goal))
+Left_Foot_N <- length(pull(Left_Foot_Data, Goal))
+
+# Prior which is uninformative in our case
+
+alpha <- 1
+beta  <- 1 
+
+prior_R <- rbeta(10000, alpha, beta)
+prior_L <- rbeta(10000, alpha, beta)
+prior_diff <- prior_R - prior_L
+
+# right foot a star and b star
+
+a_star_R <- alpha + Right_Foot_Y
+b_star_R <- beta  + Right_Foot_N - Right_Foot_Y
+
+# left foot  a star and b star
+a_star_L <- alpha + Left_Foot_Y
+b_star_L <- beta  + Left_Foot_N - Left_Foot_Y
+
+
+set.seed(43110)
+post_R <- rbeta(1000, a_star_R, b_star_R)
+post_L <- rbeta(1000, a_star_L, b_star_L)
+
+Combined_df <- data.frame(Difference = post_R - post_L)
+
+# Prior Plot
+Prior_df <- data.frame(Difference = prior_diff)
+
+G1 <- ggplot(Prior_df, aes(x = Difference)) +
+  geom_histogram(fill = "darkgreen", color = "black") +
+  labs(title = "Prior Distribution of p_right - p_left",
+  x = "Difference in Success Proportion",
+  y = "Count")
+
+
+# Posterior Plot
+G2 <- ggplot(Combined_df, aes(x = Difference)) +
+  geom_histogram(fill = "darkred", color = "black") +
+  labs(title = "Posterior Distribution of p_right - p_left",
+  x = "Difference in Success Proportion",
+  y = "Count")
+
+# Patchwork Plot Both at once
+G1 + G2
+
+# Calculate 95% Credible Interval
+R_L <- post_R - post_L
+quantile(R_L, c(0.025, 0.975))
+
+```
+
 
 ```{r}
 library(tidyverse)
